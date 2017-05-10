@@ -47,6 +47,44 @@ static NSString * const BSCollectionName = @"bsCollection";
     
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
     NSLog(@"%@", info);
+    
+    NSData *imageData = UIImageJPEGRepresentation(image, 1.0);
+    CGImageSourceRef imgSource = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, NULL);
+    CFStringRef UTI = CGImageSourceGetType(imgSource);
+    
+    NSDictionary *dict = [info objectForKey:UIImagePickerControllerMediaMetadata];
+    NSLog(@"%@", dict);
+    
+    NSMutableData *newImageData = [NSMutableData data];
+    
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge  CFMutableDataRef)newImageData, UTI, 1, NULL);
+
+    if(!destination) {
+        NSLog(@"*** Could not create image destination ***");
+        return;
+    }
+    
+    NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithDictionary:dict];
+    if (metadata) {
+        [metadata setValue:nil forKey:(NSString*)kCGImagePropertyGPSDictionary];
+    }
+    
+    CGImageDestinationAddImageFromSource(destination, imgSource, 0, (__bridge  CFDictionaryRef) metadata);
+    
+    BOOL success = NO;
+    success = CGImageDestinationFinalize(destination);
+
+    if(!success) {
+        NSLog(@"*** Could not create data from image destination ***");
+        return ;
+    }
+    
+    CFRelease(imgSource);
+    CFRelease(destination);
+    
+    CGImageRef imageRef = CGImageSourceCreateImageAtIndex(imgSource, 0, NULL);
+    UIImage *finalImage = [UIImage imageWithCGImage:imageRef scale:1 orientation:UIImageOrientationUp];
+    
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
