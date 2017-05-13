@@ -84,7 +84,7 @@ static NSString * const BSCollectionName = @"bsCollection";
     
     CGImageRef imageRef = CGImageSourceCreateImageAtIndex(imgSource, 0, NULL);
     UIImage *finalImage = [UIImage imageWithCGImage:imageRef scale:1 orientation:UIImageOrientationUp];
-    
+    UIImageWriteToSavedPhotosAlbum(finalImage, NULL, NULL, NULL);
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
